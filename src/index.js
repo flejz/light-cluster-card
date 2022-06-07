@@ -27,7 +27,7 @@ class LightEntityCard extends LitElement {
   }
 
   setConfig(config) {
-    if (!config.entityIds) throw Error('entity id list required.');
+    if (!config.entities) throw Error('entity id list required.');
 
     this.config = {
       ...defaultConfig,
@@ -75,12 +75,20 @@ class LightEntityCard extends LitElement {
   }
 
   get entities() {
-    const { entityIds } = this.config
-    return entityIds.map(eid => this.__hass.states[eid]) 
+    const { entities } = this.config
+    return entities.map(eid => this.__hass.states[eid]) 
+  }
+
+  isEntityOn(e) {
+    return e.state === 'on';
   }
 
   areEntitiesOn() {
-    return this.entities.every(e => e.state === 'on');
+    return this.entities.every(this.isEntityOn);
+  }
+
+  getEntitiesOn() {
+    return this.entities.filter(this.isEntityOn);
   }
 
   updated() {
@@ -88,12 +96,12 @@ class LightEntityCard extends LitElement {
   }
 
   render() {
-    const entities = this.config.entityIds
+    const entities = this.config.entities
       .map(eid => getEntityById(this.__hass.states, eid))
       .filter(Boolean);
 
     if (!entities || !entities.length) {
-      throw Error(`Invalid entity list: ${this.config.entityIds.join(', ')}`);
+      throw Error(`Invalid entity list: ${this.config.entities.join(', ')}`);
     }
 
     this._isUpdating = true;
@@ -266,7 +274,7 @@ class LightEntityCard extends LitElement {
   _setValue(event, entities, valueName) {
     const newValue = parseInt(event.target.value, 0);
     if (isNaN(newValue)) return;
-    this.callEntityService({ [valueName]: newValue }, entities);
+    this.callEntityService({ [valueName]: newValue }, this.getEntitiesOn());
   }
 
   /**
@@ -285,7 +293,7 @@ class LightEntityCard extends LitElement {
    * @param {LightEntity} entity
    */
   setEffect(event, entities) {
-    this.callEntityService({ effect: event.detail.value }, entities);
+    this.callEntityService({ effect: event.detail.value }, this.getEntitiesOn());
   }
 
   /**
@@ -311,6 +319,6 @@ customElements.define('light-cluster-card', LightEntityCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'light-cluster-card',
-  name: 'Light Entity Card',
+  name: 'Light Cluster Card',
   description: 'Control lights and switches',
 });
