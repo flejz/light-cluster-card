@@ -80,7 +80,7 @@ class LightEntityCard extends LitElement {
   }
 
   isEntityOn(e) {
-    return e.state === 'on';
+    return e && e.state === 'on';
   }
 
   areEntitiesOn() {
@@ -96,6 +96,7 @@ class LightEntityCard extends LitElement {
   }
 
   render() {
+    console.log('### here', this.config)
     const entities = this.config.entities
       .map(eid => getEntityById(this.__hass.states, eid))
       .filter(Boolean);

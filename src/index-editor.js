@@ -42,7 +42,7 @@ export default class LightEntityCardEditor extends LitElement {
 
     // get header name
     const { states }= this.hass;
-    let { entityIds, header } = this.config;
+    let { entities, header } = this.config;
     if (!header && this.config.entity) {
       let name = this.config.entity.split('.')[1] || '';
       if (name) {
@@ -51,17 +51,15 @@ export default class LightEntityCardEditor extends LitElement {
       }
     }
 
-    const entities = Object
+    const entityCheckboxes = Object
       .values(states)
       .filter(e => /^light\./.test(e.entity_id))
-
-    const entityCheckboxes = entities
       .map((e, i) => html`
         <div class='checkbox-options'>
           <ha-formfield label="${getEntityName(e)}">
             <ha-checkbox
               @change="${this.entitiesConfigChanged}"
-              .checked=${entityIds.indexOf(e.entity_id) > -1}
+              .checked=${entities.indexOf(e.entity_id) > -1}
               .value="${e.entity_id}"
             ></ha-checkbox>
           </ha-formfield>
@@ -188,15 +186,15 @@ export default class LightEntityCardEditor extends LitElement {
       target: { value, checked },
     } = ev;
 
-    let entityIds = [...this.config.entityIds];
+    let entities = [...this.config.entities];
 
     if (checked) {
-      entityIds = [...entityIds, value];
+      entities = [...entities, value];
     } else {
-      entityIds.splice(entityIds.indexOf(value), 1)
+      entities.splice(entities.indexOf(value), 1)
     }
 
-    this.config = { ...this.config, entityIds };
+    this.config = { ...this.config, entities };
     fireEvent(this, 'config-changed', { config: this.config });
   }
 
